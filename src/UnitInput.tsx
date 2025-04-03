@@ -6,6 +6,7 @@ const UnitInput = () => {
   const [value, setValue] = useState("0");
   const [lastValidValue, setLastValidValue] = useState("0");
   const [unit, setUnit] = useState("%");
+  const [isInputFocused, setIsInputFocused] = useState(false);
   const options = ["%", "px"];
 
   const extractNumber = (str: string) => {
@@ -39,25 +40,28 @@ const UnitInput = () => {
   };
 
   const handleBlur = () => {
-    const numValue = extractNumber(value);
+    let numValue = extractNumber(value);
+    console.log(" handleBlur numValue:", numValue);
+    setIsInputFocused(false);
 
-    if (numValue === undefined) {
-      setValue(lastValidValue);
-      return;
+    if (numValue === undefined) return setValue(lastValidValue);
+
+    numValue = Math.max(numValue, 0);
+
+    if (unit === "%" && numValue > 100) {
+      numValue = 100;
     }
 
-    let adjustedValue = numValue;
+    const finalValue = numValue.toString();
 
-    if (adjustedValue < 0) {
-      adjustedValue = 0;
+    if (finalValue !== lastValidValue) {
+      setValue(finalValue);
+      setLastValidValue(finalValue);
     }
-    if (unit === "%" && adjustedValue > 100) {
-      adjustedValue = 100;
-    }
+  };
 
-    const finalValue = adjustedValue.toString();
-    setValue(finalValue);
-    setLastValidValue(finalValue);
+  const handleFocus = () => {
+    setIsInputFocused(true);
   };
 
   const handleIncrement = () => {
@@ -129,7 +133,11 @@ const UnitInput = () => {
       <div className="flex items-center gap-2">
         <span className="text-xs min-w-[100px] text-[#AAAAAA]">Value</span>
 
-        <div className="flex items-center bg-[#212121] h-9 transition rounded-lg w-[140px]">
+        <div
+          className={`flex items-center bg-[#212121] h-9 transition rounded-lg w-[140px] ${
+            isInputFocused ? "ring-1 ring-[#3C67FF] ring-opacity-50" : ""
+          }`}
+        >
           <button
             onClick={handleDecrement}
             title={"Value must be greater than 0"}
@@ -147,9 +155,9 @@ const UnitInput = () => {
             />
 
             {isDecrementDisabled && (
-              <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-[#212121] text-[#F9F9F9] text-xs rounded py-1 px-2 whitespace-nowrap">
+              <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 hidden group-hover:block bg-[#212121] text-[#F9F9F9] text-xs rounded py-1 px-2 whitespace-nowrap z-10">
                 Value must be greater than 0
-                <span className="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-[#1C2526]"></span>
+                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-[#1C2526]"></span>
               </span>
             )}
           </button>
@@ -159,6 +167,7 @@ const UnitInput = () => {
             value={value}
             onChange={handleInputChange}
             onBlur={handleBlur}
+            onFocus={handleFocus}
             className="w-full text-xs p-2 text-center text-[#F9F9F9] focus:outline-none"
           />
 
@@ -178,9 +187,9 @@ const UnitInput = () => {
             />
 
             {isIncrementDisabled && (
-              <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-[#212121] text-[#F9F9F9] text-xs rounded py-1 px-2 whitespace-nowrap">
+              <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 hidden group-hover:block bg-[#212121] text-[#F9F9F9] text-xs rounded py-1 px-2 whitespace-nowrap z-10">
                 Value must smaller than 100
-                <span className="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-[#1C2526]"></span>
+                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-[#1C2526]"></span>
               </span>
             )}
           </button>
